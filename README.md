@@ -1,5 +1,16 @@
 # plotnine-ggtext
 
+> [!IMPORTANT]
+> **This package is retired.** Use
+> [ggtext for Python](https://github.com/snake-case-ggtext/ggtext_ShanEllis),
+> which has `geom_richtext`, `geom_textbox`, theme elements, tick labels and
+> plain matplotlib support. Its parsing comes from
+> [ggIR](https://github.com/snake-case-ggtext/ggIR), and this package's image
+> tests (including the one-to-one ports of R ggtext's tests) were moved there
+> in [ggtext_ShanEllis#1](https://github.com/snake-case-ggtext/ggtext_ShanEllis/pull/1).
+>
+> The last working version of this package depends on ggIR v0.1.0.
+
 Rich text for [plotnine](https://plotnine.org): markdown/HTML formatted labels
 and word-wrapped text boxes. A Python port of the two geoms in
 [ggtext](https://github.com/wilkelab/ggtext) by Claus O. Wilke.
