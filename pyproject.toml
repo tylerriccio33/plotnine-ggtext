@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/tylerriccio33/plotnine-ggtext"
+Repository = "https://github.com/snake-case-ggtext/plotnine-ggtext"
 
 [build-system]
 requires = ["uv_build>=0.12.2,<0.13.0"]

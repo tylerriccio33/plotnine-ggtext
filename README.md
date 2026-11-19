@@ -5,6 +5,12 @@ and word-wrapped text boxes. A Python port of the two geoms in
 [ggtext](https://github.com/wilkelab/ggtext) by Claus O. Wilke, together with
 the layout engine from [gridtext](https://github.com/wilkelab/gridtext).
 
+![demo](demo/demo.gif)
+
+<sub>The demo is recorded with [VHS](https://github.com/charmbracelet/vhs):
+`vhs demo/demo.tape` (needs `bat` and `chafa`). The plot it makes is
+[`demo/demo.png`](demo/demo.png).</sub>
+
 | ggtext (R) | plotnine-ggtext |
 |---|---|
 | `geom_richtext()` | `geom_richtext()` |
@@ -14,7 +20,7 @@ the layout engine from [gridtext](https://github.com/wilkelab/gridtext).
 ## Install
 
 ```bash
-pip install git+https://github.com/tylerriccio33/plotnine-ggtext
+pip install git+https://github.com/snake-case-ggtext/plotnine-ggtext
 ```
 
 ## Usage
