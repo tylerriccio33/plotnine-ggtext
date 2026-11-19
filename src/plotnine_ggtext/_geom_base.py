@@ -127,7 +127,7 @@ class geom_rich_base(geom):
         """
         from matplotlib.text import Text
 
-        from ._artist import rgba
+        from ggir import rgba
 
         color = data.get("text_color")
         if color is None or (isinstance(color, float) and np.isnan(color)):

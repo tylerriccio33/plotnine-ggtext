@@ -11,7 +11,7 @@ license = "GPL-2.0-only"
 license-files = ["LICENSE"]
 keywords = ["plotnine", "ggplot", "markdown", "rich text", "ggtext"]
 dependencies = [
-    "markdown>=3.4",
+    "ggir @ git+https://github.com/snake-case-ggtext/ggIR@v0.1.0",
     "plotnine>=0.15",
 ]
 

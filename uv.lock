@@ -301,6 +301,17 @@ wheels = [
 ]
 
 [[package]]
+name = "ggir"
+version = "0.1.0"
+source = { git = "https://github.com/snake-case-ggtext/ggIR?rev=v0.1.0#2612c83c825b251e242ca9c835ac5997d3cda459" }
+dependencies = [
+    { name = "markdown" },
+    { name = "matplotlib" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -931,7 +942,7 @@ name = "plotnine-ggtext"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "markdown" },
+    { name = "ggir" },
     { name = "plotnine" },
 ]
 
@@ -942,7 +953,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "markdown", specifier = ">=3.4" },
+    { name = "ggir", git = "https://github.com/snake-case-ggtext/ggIR?rev=v0.1.0" },
     { name = "plotnine", specifier = ">=0.15" },
 ]
 

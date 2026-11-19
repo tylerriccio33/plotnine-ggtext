@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from ggir import Style, as_margin_pt, as_pt_scalar, layout_rect_box, markup_to_boxes, unit
+
 from ._artist import BoxSpec
 from ._geom_base import geom_rich_base
-from ._layout import layout_rect_box
-from ._markup import Style, parse
-from ._units import as_margin_pt, as_pt_scalar, unit
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -105,7 +104,7 @@ class geom_richtext(geom_rich_base):
         style = base_style(row)
         hjust, vjust = float(row["hjust"]), float(row["vjust"])
         # gridtext: halign = hjust, valign = vjust
-        pars = parse(row["label"], style, halign=hjust, use_markdown=params["use_markdown"])
+        pars = markup_to_boxes(row["label"], style, halign=hjust, use_markdown=params["use_markdown"])
         margin = as_margin_pt(params["label_margin"])
         padding = as_margin_pt(params["label_padding"])
         r = as_pt_scalar(params["label_r"]) or 0.0

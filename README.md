@@ -2,8 +2,14 @@
 
 Rich text for [plotnine](https://plotnine.org): markdown/HTML formatted labels
 and word-wrapped text boxes. A Python port of the two geoms in
-[ggtext](https://github.com/wilkelab/ggtext) by Claus O. Wilke, together with
-the layout engine from [gridtext](https://github.com/wilkelab/gridtext).
+[ggtext](https://github.com/wilkelab/ggtext) by Claus O. Wilke.
+
+The markdown parsing and box layout (a port of R's
+[gridtext](https://github.com/wilkelab/gridtext)) live in a separate,
+plotnine-independent package,
+[ggIR](https://github.com/snake-case-ggtext/ggIR), which also provides a
+`RichText` artist for plain matplotlib. This package adds the plotnine
+geoms on top of it.
 
 ![demo](demo/demo.gif)
 
@@ -91,8 +97,9 @@ ggtext's `test-geom-richtext.R` and `test-geom-textbox.R` has a one-to-one
 image-comparison test (same data, same parameters), using plotnine's own
 baseline-image harness. The R renderings of those plots are in
 `tests/reference_r/` (re-create with `Rscript tests/reference_r/render.R`) for
-side-by-side comparison. The ports of the roxygen examples, more image tests
-and unit tests for the markup parser and layout engine are also included.
+side-by-side comparison. The ports of the roxygen examples and more image
+tests are also included. The unit tests for the markup parser and layout
+engine are in [ggIR](https://github.com/snake-case-ggtext/ggIR).
 
 To update baselines after an intended visual change:
 
@@ -102,4 +109,4 @@ uv run pytest --update-baselines
 
 ## License
 
-GPL-2, the same as ggtext. The layout engine is ported from gridtext (MIT).
+GPL-2, the same as ggtext. The engine, ggIR, is MIT, like gridtext.

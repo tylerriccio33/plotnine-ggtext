@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from ggir import as_margin_pt, as_pt_scalar, layout_rect_box, markup_to_boxes, unit
 from plotnine.exceptions import PlotnineError
 
 from ._artist import BoxSpec
 from ._geom_base import geom_rich_base
-from ._layout import layout_rect_box
-from ._markup import parse
-from ._units import as_margin_pt, as_pt_scalar, unit
 from .geom_richtext import PT, _missing, base_style
 
 if TYPE_CHECKING:
@@ -115,7 +113,7 @@ class geom_textbox(geom_rich_base):
             )
         angle, flip = ORIENTATIONS[orientation]
         halign, valign = float(row["halign"]), float(row["valign"])
-        pars = parse(row["label"], style, halign=halign, use_markdown=params["use_markdown"])
+        pars = markup_to_boxes(row["label"], style, halign=halign, use_markdown=params["use_markdown"])
         margin = as_margin_pt(params["box_margin"])
         padding = as_margin_pt(params["box_padding"])
         r = as_pt_scalar(params["box_r"]) or 0.0

@@ -1,8 +1,9 @@
 """
-Matplotlib artist that draws laid-out rich text boxes
+Matplotlib artist that draws the rich text boxes of a geom layer
 
 Layout is done at draw time, because some sizes (e.g. a textbox width
-in npc units) depend on the size of the axes.
+in npc units) depend on the size of the axes. The layout and drawing
+primitives come from ggir.
 """
 
 from __future__ import annotations
@@ -11,75 +12,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
+from ggir import box_artists, box_extent, box_transform, measure_with
 from matplotlib.artist import Artist, allow_rasterization
-from matplotlib.colors import to_rgba
-from matplotlib.patches import PathPatch
-from matplotlib.path import Path
-from matplotlib.text import Text
-from matplotlib.transforms import Affine2D, Bbox
-
-from ._metrics import font_properties, measure_with
+from matplotlib.transforms import Bbox
 
 if TYPE_CHECKING:
+    from ggir import Layout
     from matplotlib.backend_bases import RendererBase
-
-    from ._layout import Layout
-
-# Bezier constant for approximating a quarter circle
-_KAPPA = 0.5522847498
-
-
-def rounded_rect_path(x: float, y: float, w: float, h: float, r: float) -> Path:
-    """Rounded rectangle path, like `grid::roundrectGrob()`"""
-    r = max(0.0, min(r, w / 2, h / 2))
-    if r == 0:
-        verts = [(x, y), (x + w, y), (x + w, y + h), (x, y + h), (x, y)]
-        codes = [Path.MOVETO] + [Path.LINETO] * 3 + [Path.CLOSEPOLY]
-        return Path(verts, codes)
-
-    k = _KAPPA * r
-    x0, y0, x1, y1 = x, y, x + w, y + h
-    verts = [
-        (x0 + r, y0),
-        (x1 - r, y0),
-        (x1 - r + k, y0), (x1, y0 + r - k), (x1, y0 + r),
-        (x1, y1 - r),
-        (x1, y1 - r + k), (x1 - r + k, y1), (x1 - r, y1),
-        (x0 + r, y1),
-        (x0 + r - k, y1), (x0, y1 - r + k), (x0, y1 - r),
-        (x0, y0 + r),
-        (x0, y0 + r - k), (x0 + r - k, y0), (x0 + r, y0),
-        (x0 + r, y0),
-    ]  # fmt: skip
-    C = Path.CURVE4
-    codes = (
-        [Path.MOVETO, Path.LINETO]
-        + [C] * 3 + [Path.LINETO]
-        + [C] * 3 + [Path.LINETO]
-        + [C] * 3 + [Path.LINETO]
-        + [C] * 3 + [Path.CLOSEPOLY]
-    )  # fmt: skip
-    return Path(verts, codes)
-
-
-def _is_missing(c: Any) -> bool:
-    if c is None:
-        return True
-    if isinstance(c, float) and np.isnan(c):
-        return True
-    if isinstance(c, str) and c.lower() in ("none", "na", ""):
-        return True
-    return False
-
-
-def rgba(c: Any, alpha: float | None = None):
-    """Colour with alpha, or 'none' for missing colours"""
-    if _is_missing(c):
-        return "none"
-    if alpha is None or (isinstance(alpha, float) and np.isnan(alpha)):
-        return to_rgba(c)
-    r, g, b, a = to_rgba(c)
-    return (r, g, b, a * alpha)
 
 
 @dataclass
@@ -117,52 +56,21 @@ class RichTextCollection(Artist):
         bb = ax.bbox
         return bb.width * 72 / dpi, bb.height * 72 / dpi
 
-    def _draw_items(self, renderer: RendererBase | None):
-        """Generate patches and texts for all boxes, in display coords"""
+    def _boxes(self):
+        """Yield (spec, layout, transform) for each box, in display coords"""
         ax = self.axes
         assert ax is not None
         npc_w, npc_h = self._panel_size_pt()
-        px_per_pt = self.figure.dpi / 72  # pyright: ignore
-        items = []
+        dpi = self.figure.dpi  # pyright: ignore
         for s in self.specs:
             if not (np.isfinite(s.x) and np.isfinite(s.y)):
                 continue
             L = s.layout(npc_w, npc_h)
-            ax_px, ay_px = ax.transData.transform((s.x, s.y))
-            trans = (
-                Affine2D()
-                .translate(-s.hjust * L.width, -s.vjust * L.height)
-                .scale(px_per_pt)
-                .rotate_deg(s.angle)
-                .translate(ax_px, ay_px)
+            anchor = ax.transData.transform((s.x, s.y))
+            trans = box_transform(
+                L, anchor, hjust=s.hjust, vjust=s.vjust, angle=s.angle, dpi=dpi
             )
-
-            rx, ry, rw, rh = L.rect
-            patch = PathPatch(
-                rounded_rect_path(rx, ry, rw, rh, L.r),
-                transform=trans,
-                facecolor=rgba(s.fill, s.alpha),
-                edgecolor=rgba(s.edgecolor, s.alpha),
-                linewidth=s.linewidth,
-            )
-            box_items = [patch]
-            for t in L.texts:
-                px, py = trans.transform((t.x, t.y))
-                color = t.style.color if t.style.color is not None else s.text_color
-                txt = Text(
-                    px,
-                    py,
-                    t.text,
-                    color=rgba(color, s.alpha),
-                    fontproperties=font_properties(t.style),
-                    rotation=s.angle,
-                    rotation_mode="anchor",
-                    horizontalalignment="left",
-                    verticalalignment="baseline",
-                )
-                box_items.append(txt)
-            items.append(box_items)
-        return items
+            yield s, L, trans
 
     @allow_rasterization
     def draw(self, renderer: RendererBase):
@@ -171,9 +79,19 @@ class RichTextCollection(Artist):
         ax = self.axes
         renderer.open_group("richtext", gid=self.get_gid())
         with measure_with(renderer):
-            items = self._draw_items(renderer)
-        for box_items in items:
-            for a in box_items:
+            boxes = list(self._boxes())
+        for s, L, trans in boxes:
+            artists = box_artists(
+                L,
+                trans,
+                angle=s.angle,
+                text_color=s.text_color,
+                alpha=s.alpha,
+                fill=s.fill,
+                edgecolor=s.edgecolor,
+                linewidth=s.linewidth,
+            )
+            for a in artists:
                 a.set_figure(self.figure)  # pyright: ignore
                 if self._clip_on and ax is not None:
                     a.set_clip_box(ax.bbox)
@@ -182,15 +100,10 @@ class RichTextCollection(Artist):
         self.stale = False
 
     def get_window_extent(self, renderer=None):
-        bboxes = []
         if renderer is None:
             renderer = self.figure._get_renderer()  # pyright: ignore
         with measure_with(renderer):
-            items = self._draw_items(renderer)
-        for box_items in items:
-            patch = box_items[0]
-            path = patch.get_path().transformed(patch.get_transform())
-            bboxes.append(Bbox.from_extents(*path.vertices.min(0), *path.vertices.max(0)))
+            bboxes = [box_extent(L, t, margins=False) for _, L, t in self._boxes()]
         if not bboxes:
             return Bbox.null()
         return Bbox.union(bboxes)
