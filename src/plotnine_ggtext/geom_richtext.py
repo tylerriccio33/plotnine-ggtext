@@ -21,7 +21,7 @@ def _missing(v: Any) -> bool:
 
 def base_style(row: pd.Series) -> Style:
     color = row.get("text_color")
-    if _missing(color):
+    if color is None:
         color = row["color"]
     return Style(
         fontsize=float(row["size"]),
@@ -68,7 +68,7 @@ class geom_richtext(geom_rich_base):
     frame), family, fontweight, fontstyle, fill (background), group,
     hjust, vjust (numbers or "left", "center", "right", "bottom",
     "middle", "top", "inward", "outward"), label_color (frame colour,
-    overrides `color`), label_size (frame line width, mm), lineheight,
+    overrides `color`; use ``"none"`` for no frame), label_size (frame line width, mm), lineheight,
     size (font size, pt), text_color (text colour, overrides `color`).
     """
 
@@ -93,6 +93,8 @@ class geom_richtext(geom_rich_base):
         "stat": "identity",
         "position": "identity",
         "na_rm": False,
+        "nudge_x": 0,
+        "nudge_y": 0,
         "label_padding": unit(0.25, "lines"),
         "label_margin": unit(0, "lines"),
         "label_r": unit(0.15, "lines"),
@@ -114,8 +116,9 @@ class geom_richtext(geom_rich_base):
                 content_hjust=hjust, content_vjust=vjust, r=r,
             )  # fmt: skip
 
+        # None inherits `color`; "none"/NaN (R's NA) means no outline
         edge = row.get("label_color")
-        if _missing(edge):
+        if edge is None:
             edge = row["color"]
         return BoxSpec(
             x=float(row["x"]),

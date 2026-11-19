@@ -59,7 +59,7 @@ class geom_textbox(geom_rich_base):
     Aesthetics
     ----------
     **x**, **y**, **label**, alpha, box_color (outline colour, overrides
-    `color`), box_size (outline width, mm), color (default colour of text
+    `color`; use ``"none"`` for no outline), box_size (outline width, mm), color (default colour of text
     and outline), family, fontweight, fontstyle, fill (background), group,
     halign (alignment of text inside the box), hjust (alignment of the box),
     lineheight, orientation (``"upright"``, ``"left-rotated"``,
@@ -91,6 +91,8 @@ class geom_textbox(geom_rich_base):
         "stat": "identity",
         "position": "identity",
         "na_rm": False,
+        "nudge_x": 0,
+        "nudge_y": 0,
         "box_padding": unit(5.5, "pt"),
         "box_margin": unit(0, "pt"),
         "box_r": unit(5.5, "pt"),
@@ -150,8 +152,9 @@ class geom_textbox(geom_rich_base):
                 L = _do(h)
             return L
 
+        # None inherits `color`; "none"/NaN (R's NA) means no outline
         edge = row.get("box_color")
-        if _missing(edge):
+        if edge is None:
             edge = row["color"]
         return BoxSpec(
             x=float(row["x"]),

@@ -18,7 +18,7 @@ from matplotlib.path import Path
 from matplotlib.text import Text
 from matplotlib.transforms import Affine2D, Bbox
 
-from ._metrics import font_properties
+from ._metrics import font_properties, measure_with
 
 if TYPE_CHECKING:
     from matplotlib.backend_bases import RendererBase
@@ -170,7 +170,9 @@ class RichTextCollection(Artist):
             return
         ax = self.axes
         renderer.open_group("richtext", gid=self.get_gid())
-        for box_items in self._draw_items(renderer):
+        with measure_with(renderer):
+            items = self._draw_items(renderer)
+        for box_items in items:
             for a in box_items:
                 a.set_figure(self.figure)  # pyright: ignore
                 if self._clip_on and ax is not None:
@@ -181,7 +183,11 @@ class RichTextCollection(Artist):
 
     def get_window_extent(self, renderer=None):
         bboxes = []
-        for box_items in self._draw_items(renderer):
+        if renderer is None:
+            renderer = self.figure._get_renderer()  # pyright: ignore
+        with measure_with(renderer):
+            items = self._draw_items(renderer)
+        for box_items in items:
             patch = box_items[0]
             path = patch.get_path().transformed(patch.get_transform())
             bboxes.append(Bbox.from_extents(*path.vertices.min(0), *path.vertices.max(0)))
