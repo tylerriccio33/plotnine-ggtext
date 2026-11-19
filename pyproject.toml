@@ -1,16 +1,22 @@
 [project]
 name = "plotnine-ggtext"
 version = "0.1.0"
-description = "Add your description here"
+description = "Rich text (markdown/HTML) labels and text boxes for plotnine, a port of R's ggtext"
 readme = "README.md"
 authors = [
     { name = "Tyler Riccio", email = "tylerriccio8@gmail.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.11"
+license = "GPL-2.0-only"
+license-files = ["LICENSE"]
+keywords = ["plotnine", "ggplot", "markdown", "rich text", "ggtext"]
 dependencies = [
-    "markdown>=3.11.3",
-    "plotnine>=0.15.9",
+    "markdown>=3.4",
+    "plotnine>=0.15",
 ]
+
+[project.urls]
+Repository = "https://github.com/tylerriccio33/plotnine-ggtext"
 
 [build-system]
 requires = ["uv_build>=0.12.2,<0.13.0"]
@@ -20,3 +26,6 @@ build-backend = "uv_build"
 dev = [
     "pytest>=9.2.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
