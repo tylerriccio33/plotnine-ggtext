@@ -3,7 +3,6 @@ Output demo/demo.gif
 
 Require uv
 Require bat
-Require chafa
 
 Set Shell "bash"
 Set FontSize 15
@@ -14,7 +13,7 @@ Set Theme "Catppuccin Mocha"
 Set TypingSpeed 45ms
 
 Hide
-Type "cd demo && rm -f demo.png && export PS1='\[\e[1;35m\]❯\[\e[0m\] ' && clear"
+Type "uv sync -q && cd demo && rm -f demo.png && export PS1='\[\e[1;35m\]❯\[\e[0m\] ' && clear"
 Enter
 Show
 
@@ -27,11 +26,7 @@ Sleep 7s
 
 Type "uv run python demo.py"
 Enter
-Sleep 4s
-
-Type "clear && chafa -f symbols --size=125x40 demo.png"
-Enter
-Sleep 7s
+Sleep 3s
 
 Type "clear && cd .. && uv run pytest -q"
 Enter
