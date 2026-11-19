@@ -34,6 +34,7 @@ class Layout:
     height: float  # outer height, including margins
     # Rectangle drawn for the box (x, y, width, height), margins excluded
     rect: tuple[float, float, float, float]
+    r: float = 0.0  # corner radius of the rectangle
     texts: list[PlacedText] = field(default_factory=list)
 
 
@@ -234,6 +235,7 @@ def layout_rect_box(
     wrap: bool = False,
     content_hjust: float = 0.0,
     content_vjust: float = 1.0,
+    r: float = 0.0,
 ) -> Layout:
     """
     Lay out content inside a box with padding and margins (gridtext `RectBox`)
@@ -269,4 +271,4 @@ def layout_rect_box(
     cx = rx + pl + x_align
     cy = ry + pb + y_align
     texts = [PlacedText(cx + x, cy + y, n.text, n.style) for x, y, n in content.placed]
-    return Layout(W, H, rect, texts)
+    return Layout(W, H, rect, r, texts)
